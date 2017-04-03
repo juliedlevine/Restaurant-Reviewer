@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<h3>Search for a Restaurant: </h3>
+<form action="/search" method="GET">
+    <input type="text" name="searchTerm">
+    <input type="submit" name="submit" value="Submit" id="submit">
+</form>
+<br>
+{{#each restaurants}}
+    <h3><a href="/restaurant/{{id}}">{{name}}</a></h3>
+    <p>Category: {{category}}</p>
+    <p>Address: {{address}}</p>
+    <br>
+{{/each}}

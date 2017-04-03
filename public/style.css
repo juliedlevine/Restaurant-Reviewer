@@ -1,0 +1,40 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #5b5970;
+    color: white;
+}
+#heading {
+    text-align: center;
+}
+.content {
+    border: 2px solid white;
+    width: 850px;
+    margin: 0 auto;
+    padding: 20px;
+}
+img{
+    width: 80px;
+    padding: 20px;
+    display: block;
+    margin: 0 auto;
+}
+input {
+    height: 30px;
+    width: 267px;
+    border: none;
+
+}
+#submit {
+    color: white;
+    background-color: gray;
+    height: 33px;
+    width: 94px;
+    font-size: 17px;
+    text-transform: uppercase;
+}
+p {
+    margin: 0;
+}
+a {
+    color:#41b5f4;
+}
