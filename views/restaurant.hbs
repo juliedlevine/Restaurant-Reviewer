@@ -4,8 +4,64 @@
 <p>Address: {{address}}</p>
 <p>Category: {{category}}</p>
 <p>Reviews: </p>
-<ul>
+<ol>
     {{#each reviews}}
-        <li>{{review}}</li>
+        <li>Review by {{reviewer_name}}: {{title}} </li>
+            <ul>
+                <li>{{stars}} stars</li>
+                <li>{{review}}</li>
+            </ul>
+            <br>
     {{/each}}
-</ul>
+</ol>
+<h3>Write a review:</h3>
+<div class="container">
+    <form action="/addReview/{{id}}" method="POST">
+        <div class="form-group">
+            <label>Review Title:</label>
+            <input type="text" name="title" class="form-control form-input">
+        </div>
+
+        <br>
+        <div class="form-group">
+            <p>Stars:</p>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="stars" value="5">
+                    <p>5 stars</p>
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="stars" value="4">
+                    <p>4 stars</p>
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="stars" value="3">
+                    <p>3 stars</p>
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="stars" value="2">
+                    <p>2 stars</p>
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="stars" value="1">
+                    <p>1 star</p>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group review-text">
+            <label>Review:</label>
+            <textarea name="review" rows="8" cols="5" class="form-control"></textarea>
+        </div>
+
+        <input type="submit" name="submit" value="Submit" id="submit">
+    </form>
+</div>
