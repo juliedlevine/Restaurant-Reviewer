@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
 <h2>{{name}}</h2>
-<p>Address: {{address}}</p>
-<p>Category: {{category}}</p>
-<p>Reviews: </p>
+<h4>Address: {{address}}</h4>
+<h4>Category: {{category}}</h4>
+<h4>Reviews: </h4>
 <ol>
     {{#each reviews}}
         <li>Review by {{reviewer_name}}: {{title}} </li>
@@ -14,7 +14,7 @@
             <br>
     {{/each}}
 </ol>
-<h3>Write a review:</h3>
+<h4>Write a review:</h4>
 <div class="container">
     <form action="/addReview/{{id}}" method="POST">
         <div class="form-group">
@@ -62,6 +62,6 @@
             <textarea name="review" rows="8" cols="5" class="form-control"></textarea>
         </div>
 
-        <input type="submit" name="submit" value="Submit" id="submit">
+        <input type="submit" name="submit" value="Submit" class="submit">
     </form>
 </div>

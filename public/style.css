@@ -29,13 +29,18 @@ input {
 }
 .search {
     color: black;
+    margin: 0 auto;
 }
-#submit {
+.submit {
     background-color: gray;
     height: 33px;
     width: 94px;
     font-size: 17px;
     text-transform: uppercase;
+}
+#new-submit {
+    display: block;
+    margin: 0 auto;
 }
 p {
     margin: 0;
@@ -53,4 +58,8 @@ a, a:hover {
 
 .review-text {
     padding-top: 10px;
+}
+.new {
+    margin: 15px auto;
+    width: 60%;
 }

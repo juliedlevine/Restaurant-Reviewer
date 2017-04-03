@@ -6,7 +6,8 @@ var pgp = require('pg-promise')({
     promiseLib: Promise
 });
 const bodyParser = require('body-parser');
-const db = pgp({database: 'restaurant_db_2'});
+const config = require('./config.js');
+const db = pgp(config);
 
 
 
@@ -15,9 +16,13 @@ app.get('/', function(req, res) {
     res.render('home.hbs');
 });
 
+// Add a restaurant route path
+app.get('/restaurant/new', function(req, res) {
+    res.render('new.hbs');
+});
 
 
-// Submit handler
+// Submit search route path
 app.get('/search', function(req, res, next) {
     let search = "'%" + req.query.searchTerm + "%'";
     db.any(`SELECT name, address, category, restaurant.id FROM restaurant WHERE restaurant.name ilike ${search} order by name`)
@@ -30,8 +35,7 @@ app.get('/search', function(req, res, next) {
 });
 
 
-
-// Restaurant route path
+// Restaurant Page route path
 app.get('/restaurant/:id', function(req, res, next) {
     let id = req.params.id;
     db.any(`SELECT review, stars, reviewer.name as reviewer_name, restaurant.name, review.title, restaurant.address, restaurant.category FROM restaurant LEFT OUTER JOIN	review on review.restaurant_id = restaurant.id LEFT OUTER JOIN reviewer on review.reviewer_id = reviewer.id WHERE restaurant.id = ${id}`)
@@ -54,6 +58,16 @@ app.post('/addReview/:id', function(req, res, next) {
     db.one(`insert into review values (default, 1, ${req.body.stars}, '${req.body.title}', '${req.body.review}', ${req.params.id}) returning review.restaurant_id`)
         .then(function(result) {
             res.redirect('/restaurant/' + result.restaurant_id);
+        })
+        .catch(next);
+});
+
+
+// Submit New restaurant route path
+app.post('/restaurant/submit_new', function(req, res, next) {
+    db.one(`insert into restaurant values (default, '${req.body.name}', '${req.body.address}', '${req.body.category}') returning restaurant.id`)
+        .then(function(result) {
+            res.redirect('/restaurant/' + result.id);
         })
         .catch(next);
 });
