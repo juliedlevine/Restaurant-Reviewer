@@ -3,17 +3,22 @@
 <h2>{{name}}</h2>
 <h4>Address: {{address}}</h4>
 <h4>Category: {{category}}</h4>
-<h4>Reviews: </h4>
-<ol>
-    {{#each reviews}}
-        <li>Review by {{reviewer_name}}: {{title}} </li>
-            <ul>
-                <li>{{stars}} stars</li>
-                <li>{{review}}</li>
-            </ul>
-            <br>
-    {{/each}}
-</ol>
+
+{{#if reviews.0.reviewer_name}}
+    <h4>Reviews: </h4>
+    <ol>
+        {{#each reviews}}
+            <li>Review by {{reviewer_name}}: {{title}} </li>
+                <ul>
+                    <li>{{stars}} stars</li>
+                    <li>{{review}}</li>
+                </ul>
+                <br>
+        {{/each}}
+    </ol>
+{{/if}}
+<br>
+
 <h4>Write a review:</h4>
 <div class="container">
     <form action="/addReview/{{id}}" method="POST">

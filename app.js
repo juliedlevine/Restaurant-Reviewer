@@ -25,7 +25,7 @@ app.get('/restaurant/new', function(req, res) {
 // Submit search route path
 app.get('/search', function(req, res, next) {
     let search = "'%" + req.query.searchTerm + "%'";
-    db.any(`SELECT name, address, category, restaurant.id FROM restaurant WHERE restaurant.name ilike ${search} order by name`)
+    db.any(`SELECT name, address, category, restaurant.id FROM restaurant WHERE restaurant.name ilike ${search} or restaurant.category ilike ${search} order by name`)
         .then(function(restaurantArray) {
             res.render('search_results.hbs', {
                 restaurants: restaurantArray

@@ -10,6 +10,12 @@ body {
 h1 {
     padding: 10px;
 }
+h1 a {
+    color: white;
+}
+h1 a:hover {
+    text-decoration: none;
+}
 .content {
     border: 2px solid white;
     width: 850px;
