@@ -2,18 +2,27 @@
 const express = require('express');
 const app = express();
 var Promise = require('bluebird');
-var pgp = require('pg-promise')({
-    promiseLib: Promise
-});
+var pgp = require('pg-promise')({promiseLib: Promise});
 const bodyParser = require('body-parser');
 const config = require('./config.js');
 const db = pgp(config);
+app.set('view engine', 'hbs');
+app.use(express.static('public'));
+// Middleware - add to request object the body values
+app.use(bodyParser.urlencoded({extended: false}));
 
 
+
+// GET ROUTES //
 
 // Home route path
 app.get('/', function(req, res) {
-    res.render('home.hbs');
+    db.any("select * from restaurant where favorite = true")
+        .then(function(data) {
+            res.render('home.hbs', {
+                restaurants: data
+            });
+        });
 });
 
 // Add a restaurant route path
@@ -21,10 +30,9 @@ app.get('/restaurant/new', function(req, res) {
     res.render('new.hbs');
 });
 
-
 // Submit search route path
 app.get('/search', function(req, res, next) {
-    let search = '%' + req.query.searchTerm +'%';
+    let search = "%" + req.query.searchTerm + "%";
     db.any(`
         SELECT
         	name,
@@ -34,7 +42,7 @@ app.get('/search', function(req, res, next) {
         	round(avg(stars), 1) as stars
         FROM
         	restaurant
-        INNER JOIN
+        LEFT OUTER JOIN
         	review on review.restaurant_id = restaurant.id
         WHERE
         	restaurant.name ilike $1
@@ -52,16 +60,17 @@ app.get('/search', function(req, res, next) {
         .catch(next);
 });
 
-
 // Restaurant Page route path
 app.get('/restaurant/:id', function(req, res, next) {
     let id = req.params.id;
-    db.any("SELECT review, stars, reviewer.name as reviewer_name, restaurant.name, review.title, restaurant.address, restaurant.category FROM restaurant LEFT OUTER JOIN	review on review.restaurant_id = restaurant.id LEFT OUTER JOIN reviewer on review.reviewer_id = reviewer.id WHERE restaurant.id = $1", id)
+    db.any("SELECT favorite, review, stars, reviewer.name as reviewer_name, restaurant.name, review.title, restaurant.address, restaurant.category FROM restaurant LEFT OUTER JOIN	review on review.restaurant_id = restaurant.id LEFT OUTER JOIN reviewer on review.reviewer_id = reviewer.id WHERE restaurant.id = $1", id)
         .then(function(data) {
             return [data, db.one("SELECT round(avg(stars), 1) as avg_stars FROM review WHERE review.restaurant_id = $1", id)];
         })
         .spread(function(data, stars) {
+
             res.render('restaurant.hbs', {
+                favorite: data[0].favorite,
                 stars: stars.avg_stars,
                 id: id,
                 name: data[0].name,
@@ -74,8 +83,10 @@ app.get('/restaurant/:id', function(req, res, next) {
 });
 
 
+
+// POST ROUTES //
+
 // Submit Review route path
-app.use(bodyParser.urlencoded({extended: false}));
 app.post('/addReview/:id', function(req, res, next) {
     db.one(`insert into review values (default, 1, ${req.body.stars}, '${req.body.title}', '${req.body.review}', ${req.params.id}) returning review.restaurant_id`)
         .then(function(result) {
@@ -84,24 +95,28 @@ app.post('/addReview/:id', function(req, res, next) {
         .catch(next);
 });
 
-
 // Submit New restaurant route path
 app.post('/restaurant/submit_new', function(req, res, next) {
     let name = req.body.name;
     let category = req.body.category;
     let address = req.body.address;
-    db.one("insert into restaurant values (default, $1, $2, $3) returning restaurant.id", [name, category, address])
+    let favorite = req.body.favorite;
+    db.one("insert into restaurant values (default, $1, $2, $3, $4) returning restaurant.id", [name, address, category, favorite])
         .then(function(result) {
             res.redirect('/restaurant/' + result.id);
         })
         .catch(next);
 });
 
+app.post('/restaurant/add_favorite/:id', function(req, res, next) {
+    var id = req.params.id;
+    var favorite = req.body.favorite;
+    db.none("update restaurant set favorite = $1 where restaurant.id = $2", [favorite, id]);
+});
 
 
 
-app.use(express.static('public'));
-app.set('view engine', 'hbs');
+// Start server
 app.listen(3000, function() {
     console.log('Example app listening on port 3000!');
 });

@@ -7,3 +7,12 @@
 
 <h4><a href="/restaurant/new">Add Restaurant</a></h4>
 <br>
+<h3>My Favorites:</h3>
+<br>
+{{#each restaurants}}
+    <h4><a href="/restaurant/{{id}}">{{name}}</a></h4>
+    <p>Category: {{category}}</p>
+    <p>Address: {{address}}</p>
+    <!-- <p>Stars: {{stars}}</p> -->
+    <br>
+{{/each}}
