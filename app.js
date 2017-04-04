@@ -24,11 +24,26 @@ app.get('/restaurant/new', function(req, res) {
 
 // Submit search route path
 app.get('/search', function(req, res, next) {
-    let search = "'%" + req.query.searchTerm + "%'";
-    db.any(`SELECT name, address, category, restaurant.id FROM restaurant WHERE restaurant.name ilike ${search} or restaurant.category ilike ${search} order by name`)
-        // .then(function(restaurantArray) {
-        //     db.one(``)
-        // })
+    let search = '%' + req.query.searchTerm +'%';
+    db.any(`
+        SELECT
+        	name,
+        	address,
+        	category,
+        	restaurant.id,
+        	round(avg(stars), 1) as stars
+        FROM
+        	restaurant
+        INNER JOIN
+        	review on review.restaurant_id = restaurant.id
+        WHERE
+        	restaurant.name ilike $1
+        	or restaurant.category ilike $1
+        GROUP BY
+        	restaurant.id
+        order by
+        	name
+        `, search)
         .then(function(restaurantArray) {
             res.render('search_results.hbs', {
                 restaurants: restaurantArray
@@ -41,16 +56,9 @@ app.get('/search', function(req, res, next) {
 // Restaurant Page route path
 app.get('/restaurant/:id', function(req, res, next) {
     let id = req.params.id;
-    db.any(`SELECT review, stars, reviewer.name as reviewer_name, restaurant.name, review.title, restaurant.address, restaurant.category FROM restaurant LEFT OUTER JOIN	review on review.restaurant_id = restaurant.id LEFT OUTER JOIN reviewer on review.reviewer_id = reviewer.id WHERE restaurant.id = ${id}`)
+    db.any("SELECT review, stars, reviewer.name as reviewer_name, restaurant.name, review.title, restaurant.address, restaurant.category FROM restaurant LEFT OUTER JOIN	review on review.restaurant_id = restaurant.id LEFT OUTER JOIN reviewer on review.reviewer_id = reviewer.id WHERE restaurant.id = $1", id)
         .then(function(data) {
-            return [data, db.one(`
-                SELECT
-                	round(avg(stars), 1) as avg_stars
-                FROM
-                	review
-                WHERE
-                	review.restaurant_id = ${id}
-                `)];
+            return [data, db.one("SELECT round(avg(stars), 1) as avg_stars FROM review WHERE review.restaurant_id = $1", id)];
         })
         .spread(function(data, stars) {
             res.render('restaurant.hbs', {
@@ -79,7 +87,10 @@ app.post('/addReview/:id', function(req, res, next) {
 
 // Submit New restaurant route path
 app.post('/restaurant/submit_new', function(req, res, next) {
-    db.one(`insert into restaurant values (default, '${req.body.name}', '${req.body.address}', '${req.body.category}') returning restaurant.id`)
+    let name = req.body.name;
+    let category = req.body.category;
+    let address = req.body.address;
+    db.one("insert into restaurant values (default, $1, $2, $3) returning restaurant.id", [name, category, address])
         .then(function(result) {
             res.redirect('/restaurant/' + result.id);
         })
