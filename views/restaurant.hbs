@@ -3,9 +3,9 @@
 <div class="title">
     <h2>{{name}}</h2>
     {{#if favorite}}
-        <img src="/like.png" alt="heart" class="heart">
+        <img src="/like.png" alt="heart" class="heart favorite">
     {{else}}
-        <img src="/heart.png" alt="heart" class="heart">
+        <img src="/heart.png" alt="heart" class="heart not-favorite">
     {{/if}}
 
 </div>
@@ -13,11 +13,10 @@
 
 <h4>Address: {{address}}</h4>
 <h4>Category: {{category}}</h4>
+<p id = "hidden-id">{{id}}</p>
 
 {{#if reviews.0.reviewer_name}}
 <h4>Average stars: {{stars}}</h4>
-<p id = "hidden-id">{{id}}</p>
-
 <br>
     <h4>Reviews: </h4>
     <ol>

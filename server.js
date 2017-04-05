@@ -68,7 +68,6 @@ app.get('/restaurant/:id', function(req, res, next) {
             return [data, db.one("SELECT round(avg(stars), 1) as avg_stars FROM review WHERE review.restaurant_id = $1", id)];
         })
         .spread(function(data, stars) {
-
             res.render('restaurant.hbs', {
                 favorite: data[0].favorite,
                 stars: stars.avg_stars,
@@ -88,7 +87,11 @@ app.get('/restaurant/:id', function(req, res, next) {
 
 // Submit Review route path
 app.post('/addReview/:id', function(req, res, next) {
-    db.one(`insert into review values (default, 1, ${req.body.stars}, '${req.body.title}', '${req.body.review}', ${req.params.id}) returning review.restaurant_id`)
+    let stars = req.body.stars;
+    let title = req.body.title;
+    let review = req.body.review;
+    let id = req.params.id;
+    db.one(`insert into review values (default, 1, $1, $2, $3, $4) returning review.restaurant_id`, [stars, title, review, id])
         .then(function(result) {
             res.redirect('/restaurant/' + result.restaurant_id);
         })
