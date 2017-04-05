@@ -87,3 +87,8 @@ a, a:hover {
 #hidden-id {
     display: none;
 }
+#welcome {
+    position: absolute;
+    left: 10px;
+    top: 0;
+}

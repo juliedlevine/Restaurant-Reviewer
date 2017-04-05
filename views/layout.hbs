@@ -15,6 +15,14 @@
     </head>
     <body>
         <img src="/cutlery.svg" alt="Fork and Knife" class="food">
+
+        {{#if session.user}}
+            <div id="welcome">
+                <h4>Welcome, {{session.user}}!</h4>
+                <p><a href="/logout">Logout</a></p>
+            </div>
+        {{/if}}
+
         <h1 id="heading"><a href="/">Atlanta Eats!</a></h1>
         <div class="content">
 
