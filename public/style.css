@@ -2,6 +2,11 @@ body {
     box-sizing: border-box;
     font-family: 'Open Sans', sans-serif;
     background-color: #5b5970;
+    background: url('/grapes.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
     color: white;
 }
 #heading {
@@ -17,11 +22,12 @@ h1 a:hover {
     text-decoration: none;
 }
 .content {
+    background-color: #393e44;
+    opacity: 0.9;
     width: 90%;
-    max-width: 850px;
-    border: 2px solid white;
+    max-width: 700px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px 50px;
 }
 .food{
     width: 80px;
@@ -68,7 +74,7 @@ a, a:hover {
 }
 .new {
     margin: 15px auto;
-    width: 60%;
+    width: 80%;
 }
 .footer p {
     text-align: center;
@@ -89,10 +95,21 @@ a, a:hover {
 }
 #welcome {
     position: absolute;
+    color: gray;
     left: 10px;
     top: 0;
 }
 .must_login {
     padding: 30px;
     text-align: center;
+}
+.form-input {
+    color: white;
+    width: 100%;
+}
+.review-input {
+    width: 75%;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
