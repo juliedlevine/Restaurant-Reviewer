@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<form action="/add_user" method="POST">
+    <div class="form-group new">
+        <label>Username (first name):</label>
+        <input type="text" name="username" class="form-control form-input">
+    </div>
+
+    <div class="form-group new">
+        <label>Email:</label>
+        <input type="text" name="email" class="form-control form-input">
+    </div>
+
+    <div class="form-group new">
+        <label>Password:</label>
+        <input type="password" name="password" class="form-control form-input">
+    </div>
+
+    <div class="form-group new">
+        <label for="karma">Karma: </label>
+        <select class="form-control">
+          <option value="1" name="karma">1</option>
+          <option value="2" name="karma">2</option>
+          <option value="3" name="karma">3</option>
+          <option value="4" name="karma">4</option>
+          <option value="5" name="karma">5</option>
+          <option value="6" name="karma">6</option>
+          <option value="7" name="karma">7</option>
+        </select>
+    </div>
+
+    <input type="submit" name="submit" value="Submit" class="submit" id="new-submit">
+    <br>
+</form>
+
+<p>Already a member? <a href="/login">Log in</a></p>

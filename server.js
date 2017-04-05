@@ -18,9 +18,20 @@ app.use(express.static('public'));
 // Add to request object the body values from HTML
 app.use(bodyParser.urlencoded({extended: false}));
 
+// Make session automatically available to all hbs files
+app.use(function(req, res, next) {
+    res.locals.session = req.session;
+    next();
+});
+
 // Log in
 app.get('/login', function(req, res) {
     res.render('login.hbs');
+});
+
+// Sign up
+app.get('/sign_up', function(req, res) {
+    res.render('sign_up.hbs');
 });
 
 // Login failure
@@ -43,10 +54,11 @@ app.get('/logout', function(req, res) {
 app.post('/submit_login', function(req, res, next) {
     var username = req.body.username;
     var password = req.body.password;
-    db.one("SELECT name, password FROM reviewer WHERE name = $1", username)
+    db.one("SELECT id, name, password FROM reviewer WHERE name = $1", username)
         .then(function(loginDetails) {
             if (password === loginDetails.password) {
                 req.session.user = username;
+                req.session.user_id = loginDetails.id;
                 res.redirect('/');
             } else {
                 res.redirect('/login_fail');
@@ -57,11 +69,22 @@ app.post('/submit_login', function(req, res, next) {
         });
 });
 
-// Make session automatically available to all hbs files
-app.use(function(req, res, next) {
-    res.locals.session = req.session;
-    next();
-});
+// Submit new user log in details
+app.post('/add_user', function(req, res, next) {
+    var username = req.body.username;
+    var email = req.body.email;
+    var password = req.body.password;
+    var karma = req.body.karma;
+    db.one("INSERT into reviewer values(default, $1, $2, $3, $4) returning reviewer.id as id", [username, email, karma, password])
+        .then(function(result) {
+            req.session.user = username;
+            req.session.user_id = result.id;
+            res.redirect('/');
+        })
+        .catch(function() {
+            res.redirect('/login_fail');
+        });
+})
 
 // Authenticate log in
 app.use(function authentication(req, res, next) {
@@ -74,7 +97,22 @@ app.use(function authentication(req, res, next) {
 
 // Home route path
 app.get('/', function(req, res, next) {
-    db.any("select * from restaurant where favorite = true")
+    db.any(`
+        SELECT
+            restaurant.id,
+        	restaurant.name as name,
+        	restaurant.category,
+        	restaurant.address
+
+        FROM
+        	restaurant,
+        	favorites,
+        	reviewer
+        WHERE
+        	favorites.restaurant_id = restaurant.id
+        	and favorites.reviewer_id = reviewer.id
+        	and reviewer.name = $1
+        `, req.session.user)
         .then(function(favorites) {
             res.render('home.hbs', {
                 restaurants: favorites
@@ -121,19 +159,59 @@ app.get('/restaurant/new', function(req, res) {
 // Restaurant page route path
 app.get('/restaurant/:id', function(req, res, next) {
     let id = req.params.id;
-    db.any("SELECT favorite, review, stars, reviewer.name as reviewer_name, restaurant.name, review.title, restaurant.address, restaurant.category FROM restaurant LEFT OUTER JOIN	review on review.restaurant_id = restaurant.id LEFT OUTER JOIN reviewer on review.reviewer_id = reviewer.id WHERE restaurant.id = $1", id)
-        .then(function(data) {
-            return [data, db.one("SELECT round(avg(stars), 1) as avg_stars FROM review WHERE review.restaurant_id = $1", id)];
+    db.any(`
+        SELECT
+        	reviewer.name as reviewer_name,
+            restaurant.name,
+        	title,
+        	stars,
+        	review
+        FROM
+        	restaurant
+        LEFT OUTER JOIN
+        	review on review.restaurant_id = restaurant.id
+        LEFT OUTER JOIN
+        	reviewer on review.reviewer_id = reviewer.id
+        WHERE
+        	restaurant.id = $1
+        `, id)
+        .then(function(review_data) {
+            return [review_data, db.one(`
+                SELECT
+                	restaurant.name,
+                	address,
+                	category,
+                	restaurant.id,
+                	round(avg(stars), 1) as stars
+                FROM
+                	restaurant
+                LEFT OUTER JOIN
+                	review on review.restaurant_id = restaurant.id
+                WHERE
+                	restaurant.id = $1
+                GROUP BY
+                	restaurant.id
+                `, id)];
         })
-        .spread(function(data, stars) {
+        .spread(function(review_data, restaurant_data) {
+            return [review_data, restaurant_data, db.any(`
+                SELECT
+                	*
+                FROM
+                	favorites
+                WHERE
+                	restaurant_id = $1 and reviewer_id = $2;
+                `, [restaurant_data.id, req.session.user_id])];
+        })
+        .spread(function(review_data, restaurant_data, favorite) {
             res.render('restaurant.hbs', {
-                favorite: data[0].favorite,
-                stars: stars.avg_stars,
-                id: id,
-                name: data[0].name,
-                address: data[0].address,
-                category: data[0].category,
-                reviews: data
+                favorite: favorite,
+                reviews: review_data,
+                name: restaurant_data.name,
+                address: restaurant_data.address,
+                category: restaurant_data.category,
+                id: restaurant_data.id,
+                avg_stars: restaurant_data.stars
             });
         })
         .catch(next);
@@ -145,7 +223,15 @@ app.post('/restaurant/submit_new', function(req, res, next) {
     let category = req.body.category;
     let address = req.body.address;
     let favorite = req.body.favorite;
-    db.one("insert into restaurant values (default, $1, $2, $3, $4) returning restaurant.id", [name, address, category, favorite])
+
+    db.one("insert into restaurant values (default, $1, $2, $3) returning restaurant.id", [name, address, category])
+        .then(function(result) {
+            if (favorite === "true") {
+                return db.one("insert into favorites values($1, $2) returning restaurant_id as id", [result.id, req.session.user_id]);
+            } else if (favorite === "false"){
+                return result;
+            }
+        })
         .then(function(result) {
             res.redirect('/restaurant/' + result.id);
         })
@@ -156,7 +242,11 @@ app.post('/restaurant/submit_new', function(req, res, next) {
 app.post('/restaurant/add_favorite/:id', function(req, res, next) {
     var id = req.params.id;
     var favorite = req.body.favorite;
-    db.none("update restaurant set favorite = $1 where restaurant.id = $2", [favorite, id]);
+    if (favorite === "true") {
+        db.none("insert into favorites values ($1, $2)", [id, req.session.user_id]);
+    } else if (favorite === "false") {
+        db.none("delete from favorites where restaurant_id = $1 and reviewer_id = $2", [id, req.session.user_id]);
+    }
 });
 
 // Form submit - add review route path
@@ -165,7 +255,7 @@ app.post('/restaurant/addReview/:id', function(req, res, next) {
     let title = req.body.title;
     let review = req.body.review;
     let id = req.params.id;
-    db.one(`insert into review values (default, 1, $1, $2, $3, $4) returning review.restaurant_id`, [stars, title, review, id])
+    db.one(`insert into review values (default, $1, $2, $3, $4, $5) returning review.restaurant_id`, [req.session.user_id, stars, title, review, id])
         .then(function(result) {
             res.redirect('/restaurant/' + result.restaurant_id);
         })

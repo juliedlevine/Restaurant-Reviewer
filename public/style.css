@@ -92,3 +92,7 @@ a, a:hover {
     left: 10px;
     top: 0;
 }
+.must_login {
+    padding: 30px;
+    text-align: center;
+}
