@@ -25,7 +25,7 @@ app.use(function(req, res, next) {
 });
 
 // Log in
-app.get('/login', function(req, res) {
+app.get('/', function(req, res) {
     res.render('login.hbs');
 });
 
@@ -34,20 +34,10 @@ app.get('/sign_up', function(req, res) {
     res.render('sign_up.hbs');
 });
 
-// Login failure
-app.get('/login_fail', function(req, res) {
-    res.render('login_fail.hbs');
-});
-
-// Must login
-app.get('/must_login', function(req, res) {
-    res.render('must_login.hbs');
-});
-
 // Log out
 app.get('/logout', function(req, res) {
     req.session.user = null;
-    res.redirect('/login');
+    res.redirect('/');
 });
 
 // Submit Log in details
@@ -62,13 +52,13 @@ app.post('/submit_login', function(req, res, next) {
             if (matched) {
                 req.session.user = username;
                 req.session.user_id = loginDetails.id;
-                res.redirect('/');
+                res.send('match');
             } else {
-                res.redirect('/login_fail');
+                res.send('fail');
             }
         })
         .catch(function() {
-            res.redirect('/login_fail');
+            res.send('fail');
         });
 });
 
@@ -89,7 +79,7 @@ app.post('/add_user', function(req, res, next) {
                 res.send('match');
             })
             .catch(function() {
-                res.send('failure');
+                res.send('fail');
             });
     } else if (password !== confirm){
         res.send('not match');
@@ -103,12 +93,12 @@ app.use(function authentication(req, res, next) {
     if (req.session.user) {
         next();
     } else {
-        res.redirect('/must_login');
+        res.redirect('/');
     }
 });
 
 // Home route path
-app.get('/', function(req, res, next) {
+app.get('/user_home', function(req, res, next) {
     db.any(`
         SELECT
             restaurant.id,
@@ -126,7 +116,7 @@ app.get('/', function(req, res, next) {
         	and reviewer.name = $1
         `, req.session.user)
         .then(function(favorites) {
-            res.render('home.hbs', {
+            res.render('user_home.hbs', {
                 restaurants: favorites
             });
         })
@@ -157,6 +147,7 @@ app.get('/search', function(req, res, next) {
         `, search)
         .then(function(restaurantArray) {
             res.render('search_results.hbs', {
+                search: req.query.searchTerm,
                 restaurants: restaurantArray
             });
         })

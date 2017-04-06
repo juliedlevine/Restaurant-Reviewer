@@ -2,6 +2,7 @@ $(document).ready(function() {
     $('.heart').click(function() {
         var id = $('#hidden-id').text();
         if ($(this).hasClass('not-favorite')) {
+            swal("Success!", "Added to your favorites!", "success");
             $(this).attr('src', '/like.png').addClass('favorite').removeClass('not-favorite');
             $.ajax({
                   type: "POST",
@@ -23,6 +24,47 @@ $(document).ready(function() {
        theme: 'fontawesome-stars'
     });
 
+    function check(response) {
+        if (response === 'match') {
+            window.location.href = '/user_home';
+        } else if (response === 'not match'){
+            swal({
+                title: "Error!",
+                text: "Passwords do not match",
+                type: "error",
+                confirmButtonText: "Try again"
+            });
+        } else if (response === 'fail') {
+            swal({
+                title: "Error!",
+                text: "Try again",
+                type: "error",
+                confirmButtonText: "Try again"
+            });
+        } else if (response === 'empty') {
+            swal({
+                title: "Error!",
+                text: "You must fill out all the fields!",
+                type: "error",
+                confirmButtonText: "Cool"
+            });
+        }
+    }
+
+    $('#submit_login').click(function() {
+        $.ajax({
+            url: "/submit_login",
+            type: "POST",
+            data: {
+                username: $('.username').val(),
+                password: $('.password').val(),
+            }
+        })
+        .then(function(response) {
+            check(response);
+        });
+    });
+
     $('#new_user').click(function() {
         $.ajax({
             url: "/add_user",
@@ -35,26 +77,7 @@ $(document).ready(function() {
             }
         })
         .then(function(response) {
-            if (response === 'match') {
-                window.location.href = '/';
-            } else if (response === 'not match'){
-                swal({
-                    title: "Error!",
-                    text: "Passwords do not match",
-                    type: "error",
-                    confirmButtonText: "Try again"
-                });
-            } else if (response === 'failure') {
-                window.location.href = '/login_fail';
-            } else if (response === 'empty') {
-                swal({
-                    title: "Error!",
-                    text: "You must fill out all the fields!",
-                    type: "error",
-                    confirmButtonText: "Cool"
-                });
-            }
-
+            check(response);
         });
     });
 

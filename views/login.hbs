@@ -1,17 +1,25 @@
 <!DOCTYPE html>
+<div class="welcome">
+    <h3>Welcome!</h3>
+    <p>Atlanta Eats is a fun site where you can share your favorite restaurants and reviews with friends and family.</p>
+    <br>
+    <p>Login below or sign up to create a new account.</p>
+</div>
+
 
 <form action="/submit_login" method="POST">
     <div class="form-group new">
         <label>Username:</label>
-        <input type="text" name="username" class="form-control form-input">
+        <input type="text" name="username" class="form-control username form-input">
     </div>
 
     <div class="form-group new">
         <label>Password:</label>
-        <input type="password" name="password" class="form-control form-input">
+        <input type="password" name="password" class="form-control password form-input">
     </div>
 
-    <input type="submit" name="submit" value="Submit" class="submit" id="login_submit" >
+    <button type="button" name="button" id="submit_login">Submit</button>
+    <!-- <input type="submit" name="submit" value="Submit" class="submit" id="login_submit" > -->
     <br>
 
 </form>
