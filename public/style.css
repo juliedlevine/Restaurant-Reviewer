@@ -10,7 +10,9 @@ body {
     color: white;
 }
 #heading {
+    font-family: 'Pacifico', cursive;
     text-align: center;
+    font-size: 55px;
 }
 h1 {
     padding: 10px;
@@ -62,15 +64,12 @@ a, a:hover {
     color:#41b5f4;
 }
 .container {
+    width: 100%;
     max-width: 800px;
 }
 .radio p {
     margin-top: 8px;
     padding-left: 5px;
-}
-
-.review-text {
-    padding-top: 10px;
 }
 .new {
     margin: 15px auto;
@@ -104,12 +103,16 @@ a, a:hover {
     text-align: center;
 }
 .form-input {
-    color: white;
+    color: black;
     width: 100%;
 }
 .review-input {
-    width: 75%;
+    width: 100%;
 }
 input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 1000px white inset;
+}
+.icon {
+    padding-bottom: 20px;
+    width: 80px;
 }

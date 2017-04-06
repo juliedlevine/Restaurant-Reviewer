@@ -2,7 +2,6 @@
 const express = require('express');
 const app = express();
 var Promise = require('bluebird');
-var fsp = require('fs-promise');
 var pgp = require('pg-promise')({promiseLib: Promise});
 const bodyParser = require('body-parser');
 const config = require('./config.js');
@@ -84,7 +83,7 @@ app.post('/add_user', function(req, res, next) {
         .catch(function() {
             res.redirect('/login_fail');
         });
-})
+});
 
 // Authenticate log in
 app.use(function authentication(req, res, next) {

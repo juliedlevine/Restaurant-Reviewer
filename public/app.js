@@ -17,4 +17,10 @@ $(document).ready(function() {
                 });
         }
     });
+
+
+    $('#stars').barrating({
+       theme: 'fontawesome-stars'
+    });
+
 });
