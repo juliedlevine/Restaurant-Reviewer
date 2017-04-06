@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const config = require('./config.js');
 const db = pgp(config.database);
 const session = require('express-session');
+const bcrypt = require('bcrypt');
 app.set('view engine', 'hbs');
 app.use(session(config.session));
 
@@ -55,13 +56,12 @@ app.post('/submit_login', function(req, res, next) {
     var password = req.body.password;
     db.one("SELECT id, name, password FROM reviewer WHERE name = $1", username)
         .then(function(loginDetails) {
-            if (password === loginDetails.password) {
-                req.session.user = username;
-                req.session.user_id = loginDetails.id;
-                res.redirect('/');
-            } else {
-                res.redirect('/login_fail');
-            }
+            return [loginDetails, bcrypt.compare(password, loginDetails.password)];
+        })
+        .spread(function(loginDetails, matched) {
+            req.session.user = username;
+            req.session.user_id = loginDetails.id;
+            res.redirect('/');
         })
         .catch(function() {
             res.redirect('/login_fail');
@@ -73,16 +73,24 @@ app.post('/add_user', function(req, res, next) {
     var username = req.body.username;
     var email = req.body.email;
     var password = req.body.password;
-    var karma = req.body.karma;
-    db.one("INSERT into reviewer values(default, $1, $2, $3, $4) returning reviewer.id as id", [username, email, karma, password])
-        .then(function(result) {
-            req.session.user = username;
-            req.session.user_id = result.id;
-            res.redirect('/');
-        })
-        .catch(function() {
-            res.redirect('/login_fail');
-        });
+    var confirm = req.body.confirm_password;
+    if (password === confirm) {
+        bcrypt.hash(password, 10)
+            .then(function(encrypted) {
+                return db.one("INSERT into reviewer values(default, $1, $2, $3) returning reviewer.id as id", [username, email, encrypted]);
+            })
+            .then(function(result) {
+                req.session.user = username;
+                req.session.user_id = result.id;
+                res.redirect('/');
+            })
+            .catch(function() {
+                res.redirect('/login_fail');
+            });
+    } else {
+        res.redirect('/sign_up');
+    }
+
 });
 
 // Authenticate log in
