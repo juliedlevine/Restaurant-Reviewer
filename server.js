@@ -59,9 +59,13 @@ app.post('/submit_login', function(req, res, next) {
             return [loginDetails, bcrypt.compare(password, loginDetails.password)];
         })
         .spread(function(loginDetails, matched) {
-            req.session.user = username;
-            req.session.user_id = loginDetails.id;
-            res.redirect('/');
+            if (matched) {
+                req.session.user = username;
+                req.session.user_id = loginDetails.id;
+                res.redirect('/');
+            } else {
+                res.redirect('/login_fail');
+            }
         })
         .catch(function() {
             res.redirect('/login_fail');
@@ -73,8 +77,8 @@ app.post('/add_user', function(req, res, next) {
     var username = req.body.username;
     var email = req.body.email;
     var password = req.body.password;
-    var confirm = req.body.confirm_password;
-    if (password === confirm) {
+    var confirm = req.body.confirm;
+    if (password === confirm && username !== '' && email !== '') {
         bcrypt.hash(password, 10)
             .then(function(encrypted) {
                 return db.one("INSERT into reviewer values(default, $1, $2, $3) returning reviewer.id as id", [username, email, encrypted]);
@@ -82,15 +86,16 @@ app.post('/add_user', function(req, res, next) {
             .then(function(result) {
                 req.session.user = username;
                 req.session.user_id = result.id;
-                res.redirect('/');
+                res.send('match');
             })
             .catch(function() {
-                res.redirect('/login_fail');
+                res.send('failure');
             });
-    } else {
-        res.redirect('/sign_up');
+    } else if (password !== confirm){
+        res.send('not match');
+    } else if (username === '' || email === '' || password === '' || confirm === '') {
+        res.send('empty');
     }
-
 });
 
 // Authenticate log in

@@ -53,10 +53,20 @@ input {
     font-size: 17px;
     text-transform: uppercase;
 }
-#new-submit {
+#new_user {
+    font-size: 18px;
+    display: block;
+    margin: 0 auto;
+    background-color: gray;
+    border: none;
+    padding: 5px 18px;
+    text-transform: uppercase;
+}
+#login_submit, #add_restaurant {
     display: block;
     margin: 0 auto;
 }
+
 p {
     margin: 0;
 }

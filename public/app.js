@@ -23,4 +23,40 @@ $(document).ready(function() {
        theme: 'fontawesome-stars'
     });
 
+    $('#new_user').click(function() {
+        $.ajax({
+            url: "/add_user",
+            type: "POST",
+            data: {
+                username: $('.username').val(),
+                email: $('.email').val(),
+                password: $('.password').val(),
+                confirm: $('.confirm_password').val()
+            }
+        })
+        .then(function(response) {
+            if (response === 'match') {
+                window.location.href = '/';
+            } else if (response === 'not match'){
+                swal({
+                    title: "Error!",
+                    text: "Passwords do not match",
+                    type: "error",
+                    confirmButtonText: "Try again"
+                });
+            } else if (response === 'failure') {
+                window.location.href = '/login_fail';
+            } else if (response === 'empty') {
+                swal({
+                    title: "Error!",
+                    text: "You must fill out all the fields!",
+                    type: "error",
+                    confirmButtonText: "Cool"
+                });
+            }
+
+        });
+    });
+
+
 });
