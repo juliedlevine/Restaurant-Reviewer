@@ -68,6 +68,15 @@ app.post('/add_user', function(req, res, next) {
     var email = req.body.email;
     var password = req.body.password;
     var confirm = req.body.confirm;
+    db.any("SELECT name FROM reviewer WHERE name = $1", username)
+        .then(function(result) {
+            if (username === result[0].name) {
+                res.send('taken');
+            }
+        })
+        .catch(function() {
+            res.send('fail');
+        });
     if (password === confirm && username !== '' && email !== '') {
         bcrypt.hash(password, 10)
             .then(function(encrypted) {

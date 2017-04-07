@@ -25,6 +25,11 @@ $(document).ready(function() {
     });
 
     function check(response) {
+        $('.username').val('');
+        $('.email').val('');
+        $('.password').val('');
+        $('.confirm_password').val('');
+        
         if (response === 'match') {
             window.location.href = '/user_home';
         } else if (response === 'not match'){
@@ -48,7 +53,15 @@ $(document).ready(function() {
                 type: "error",
                 confirmButtonText: "Cool"
             });
+        } else if (response === 'taken') {
+            swal({
+                title: "Error!",
+                text: "Username already taken!",
+                type: "error",
+                confirmButtonText: "Cool"
+            });
         }
+
     }
 
     $('#submit_login').click(function() {
@@ -62,6 +75,9 @@ $(document).ready(function() {
         })
         .then(function(response) {
             check(response);
+        })
+        .catch(function(err) {
+            console.log(err.message);
         });
     });
 
@@ -78,6 +94,9 @@ $(document).ready(function() {
         })
         .then(function(response) {
             check(response);
+        })
+        .catch(function(err) {
+            console.log(err.message);
         });
     });
 
