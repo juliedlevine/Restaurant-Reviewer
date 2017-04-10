@@ -135,3 +135,7 @@ input:-webkit-autofill {
 .welcome h3 {
     padding-bottom: 15px;
 }
+.new_user {
+    width: 75%;
+    margin: 0 auto;
+}

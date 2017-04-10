@@ -24,6 +24,8 @@ $(document).ready(function() {
     });
 
     function check(response) {
+        $('.first').val('');
+        $('.last').val('');
         $('.username').val('');
         $('.email').val('');
         $('.password').val('');
@@ -85,6 +87,8 @@ $(document).ready(function() {
             url: "/add_user",
             type: "POST",
             data: {
+                first: $('.first').val(),
+                last: $('.last').val(),
                 username: $('.username').val(),
                 email: $('.email').val(),
                 password: $('.password').val(),

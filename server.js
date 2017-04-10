@@ -44,57 +44,53 @@ app.get('/logout', function(req, res) {
 app.post('/submit_login', function(req, res, next) {
     var username = req.body.username;
     var password = req.body.password;
-    db.one("SELECT id, name, password FROM reviewer WHERE name = $1", username)
+    db.one("SELECT id, first, username, password FROM reviewer WHERE username = $1", username)
         .then(function(loginDetails) {
             return [loginDetails, bcrypt.compare(password, loginDetails.password)];
         })
         .spread(function(loginDetails, matched) {
             if (matched) {
-                req.session.user = username;
+                req.session.user = loginDetails.first;
                 req.session.user_id = loginDetails.id;
                 res.send('match');
             } else {
                 res.send('fail');
             }
         })
-        .catch(function() {
+        .catch(function(err) {
+            console.log(err.message);
             res.send('fail');
         });
 });
 
 // Submit new user log in details
 app.post('/add_user', function(req, res, next) {
+    var first = req.body.first;
+    var last = req.body.last;
     var username = req.body.username;
     var email = req.body.email;
     var password = req.body.password;
     var confirm = req.body.confirm;
-    db.any("SELECT name FROM reviewer WHERE name = $1", username)
-        .then(function(result) {
-            if (username === result[0].name) {
-                res.send('taken');
-            }
-        })
-        .catch(function() {
-            res.send('fail');
-        });
-    if (password === confirm && username !== '' && email !== '') {
+    if (username === '' || email === '' || password === '' || confirm === '' || first === '' || last === '') {
+        res.send('empty');
+    } else if (password !== confirm) {
+        res.send('not match');
+    } else {
         bcrypt.hash(password, 10)
             .then(function(encrypted) {
-                return db.one("INSERT into reviewer values(default, $1, $2, $3) returning reviewer.id as id", [username, email, encrypted]);
+                return db.one("INSERT into reviewer values(default, $1, $2, $3, $4, $5) returning reviewer.id as id", [username, email, encrypted, first, last]);
             })
             .then(function(result) {
-                req.session.user = username;
+                req.session.user = first;
                 req.session.user_id = result.id;
                 res.send('match');
             })
-            .catch(function() {
-                res.send('fail');
+            .catch(function(err) {
+                console.log(err.message);
+                res.send('taken');
             });
-    } else if (password !== confirm){
-        res.send('not match');
-    } else if (username === '' || email === '' || password === '' || confirm === '') {
-        res.send('empty');
     }
+
 });
 
 // Authenticate log in
@@ -122,8 +118,8 @@ app.get('/user_home', function(req, res, next) {
         WHERE
         	favorites.restaurant_id = restaurant.id
         	and favorites.reviewer_id = reviewer.id
-        	and reviewer.name = $1
-        `, req.session.user)
+        	and reviewer.id = $1
+        `, req.session.user_id)
         .then(function(favorites) {
             res.render('user_home.hbs', {
                 restaurants: favorites
@@ -173,7 +169,7 @@ app.get('/restaurant/:id', function(req, res, next) {
     let id = req.params.id;
     db.any(`
         SELECT
-        	reviewer.name as reviewer_name,
+        	reviewer.first as reviewer_name,
             restaurant.name,
         	title,
         	stars,
