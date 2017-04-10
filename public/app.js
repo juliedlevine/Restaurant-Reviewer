@@ -19,7 +19,6 @@ $(document).ready(function() {
         }
     });
 
-
     $('#stars').barrating({
        theme: 'fontawesome-stars'
     });
@@ -29,7 +28,7 @@ $(document).ready(function() {
         $('.email').val('');
         $('.password').val('');
         $('.confirm_password').val('');
-        
+
         if (response === 'match') {
             window.location.href = '/user_home';
         } else if (response === 'not match'){
