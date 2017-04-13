@@ -274,5 +274,5 @@ app.post('/restaurant/addReview/:id', function(req, res, next) {
 
 // Start server
 app.listen(5000, function() {
-    console.log('Example app listening on port 3000!');
+    console.log('Example app listening on port 5000!');
 });
