@@ -44,6 +44,8 @@ app.get('/logout', function(req, res) {
 app.post('/submit_login', function(req, res, next) {
     var username = req.body.username;
     var password = req.body.password;
+    console.log('username ' + username);
+    console.log('password' + password);
     db.one("SELECT id, first, username, password FROM reviewer WHERE username = $1", username)
         .then(function(loginDetails) {
             return [loginDetails, bcrypt.compare(password, loginDetails.password)];

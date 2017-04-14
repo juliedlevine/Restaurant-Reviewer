@@ -65,12 +65,12 @@ $(document).ready(function() {
 
     }
 
-    $('#submitLogin').click(function() {
+    $('#submit_login').click(function() {
         $.ajax({
-            url: "/submitLogin",
+            url: "/submit_login",
             type: "POST",
             data: {
-                username: $('.email').val(),
+                username: $('.username').val(),
                 password: $('.password').val(),
             }
         })
