@@ -8,7 +8,7 @@ $(document).ready(function() {
                   type: "POST",
                   url: '/restaurant/add_favorite/' + id,
                   data: { favorite : true }
-                });
+              });
         } else if ($(this).hasClass('favorite')) {
             $(this).attr('src', '/heart.png').addClass('not-favorite').removeClass('favorite');
             $.ajax({
@@ -62,7 +62,6 @@ $(document).ready(function() {
                 confirmButtonText: "Cool"
             });
         }
-
     }
 
     $('#submit_login').click(function() {
