@@ -1,4 +1,32 @@
 $(document).ready(function() {
+    $('#searchButton').click(function() {
+        analytics.track('Search Button Clicked', {
+            location: 'User Home',
+            type: 'button'
+        });
+    })
+
+    $('#addButton').click(function() {
+        analytics.track('Add Restaurant Button Clicked', {
+            location: 'User Home',
+            type: 'button'
+        });
+    })
+
+    $('#addReview').click(function() {
+        analytics.track('Submit review for restaurant', {
+            location: 'Restaurant Home',
+            type: 'button'
+        });
+    })
+
+    $('.restaurantLink').click(function() {
+        analytics.track('Navigate to individaul restaurant', {
+            location: 'User Home',
+            type: 'button'
+        });
+    })
+
     $('.heart').click(function() {
         var id = $('#hidden-id').text();
         if ($(this).hasClass('not-favorite')) {

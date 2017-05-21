@@ -2,15 +2,15 @@
 <h3>Search by Restaurant name or Category: </h3>
 <form action="/search" method="GET">
     <input type="text" name="searchTerm" class="search">
-    <input type="submit" name="submit" value="Submit" class="submit">
+    <input type="submit" name="submit" value="Submit" class="submit" id="searchButton">
 </form>
 
-<h4><a href="/restaurant/new">Add Restaurant</a></h4>
+<h4><a id="addButton" href="/restaurant/new">Add Restaurant</a></h4>
 <br>
 <h3>My Favorites:</h3>
 <br>
 {{#each restaurants}}
-    <h4><a href="/restaurant/{{id}}">{{name}}</a></h4>
+    <h4><a class="restaurantLink" href="/restaurant/{{id}}">{{name}}</a></h4>
     <p>Category: {{category}}</p>
     <p>Address: {{address}}</p>
     <br>
